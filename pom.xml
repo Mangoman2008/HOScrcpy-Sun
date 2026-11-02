@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.huawei</groupId>
+    <artifactId>HOScrcpy</artifactId>
+    <version>0.0.1</version>
+
+    <properties>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- ffmpeg 原生库的 classifier，默认 linux-x86_64；下面 profile 会按操作系统自动覆盖 -->
+        <ffmpeg.classifier>linux-x86_64</ffmpeg.classifier>
+    </properties>
+    <dependencies>
+        <!--
+          华为 HOScrcpy SDK（闭源，需从发布页下载后放到 src/main/resources/libs/，详见 README）。
+          用 system scope 引入，并由下方 maven-dependency-plugin 在 generate-resources 阶段
+          把 jar 解包进 target/classes —— 这样 maven-shade-plugin 才能把 SDK 的类真正展开进可执行 jar。
+        -->
+        <dependency>
+            <groupId>com.huawei.hosscrcpy</groupId>
+            <artifactId>hosscrcpy</artifactId>
+            <type>jar</type>
+            <scope>system</scope>
+            <version>1.0.18-beta</version>
+            <systemPath>${basedir}/src/main/resources/libs/hosScrcpy-1.0.18-beta.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.12.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.15.2</version>
+        </dependency>
+        <!-- FFmpeg 的 Java 绑定（源码直接使用 org.bytedeco.ffmpeg.* 与 org.bytedeco.javacpp.*） -->
+        <dependency>
+            <groupId>org.bytedeco</groupId>
+            <artifactId>ffmpeg</artifactId>
+            <version>6.0-1.5.9</version>
+        </dependency>
+        <!-- 平台相关的 FFmpeg 原生库，classifier 由 profile 按当前操作系统自动选择 -->
+        <dependency>
+            <groupId>org.bytedeco</groupId>
+            <artifactId>ffmpeg</artifactId>
+            <version>6.0-1.5.9</version>
+            <classifier>${ffmpeg.classifier}</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.formdev</groupId>
+            <artifactId>flatlaf</artifactId>
+            <version>3.6</version>
+        </dependency>
+        <!-- IntelliJ GUI Designer 运行时（.form 生成的 setupUI 代码依赖 GridLayoutManager / GridConstraints / Spacer） -->
+        <dependency>
+            <groupId>com.github.adedayo.intellij.sdk</groupId>
+            <artifactId>forms_rt</artifactId>
+            <version>142.1</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>HOScrcpy</finalName>
+        <resources>
+            <!-- libs/ 下的 SDK jar 只作为依赖来源，不能当成普通资源打进 jar -->
+            <resource>
+                <directory>src/main/resources</directory>
+                <excludes>
+                    <exclude>libs/**</exclude>
+                </excludes>
+            </resource>
+        </resources>
+        <plugins>
+            <!-- 把闭源 SDK jar 解包进 target/classes，使其类真正进入最终 jar -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.6.1</version>
+                <executions>
+                    <execution>
+                        <id>unpack-hosscrcpy-sdk</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>unpack-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <includeGroupIds>com.huawei.hosscrcpy</includeGroupIds>
+                            <includeScope>system</includeScope>
+                            <outputDirectory>${project.build.outputDirectory}</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- 打成可直接 java -jar 运行的单文件胖包 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.5.1</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>Main</mainClass>
+                                </transformer>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                            </transformers>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>ffmpeg-windows</id>
+            <activation>
+                <os><family>windows</family></os>
+            </activation>
+            <properties>
+                <ffmpeg.classifier>windows-x86_64</ffmpeg.classifier>
+            </properties>
+        </profile>
+        <profile>
+            <id>ffmpeg-mac-x86_64</id>
+            <activation>
+                <os><family>mac</family><arch>x86_64</arch></os>
+            </activation>
+            <properties>
+                <ffmpeg.classifier>macosx-x86_64</ffmpeg.classifier>
+            </properties>
+        </profile>
+        <profile>
+            <id>ffmpeg-mac-arm64</id>
+            <activation>
+                <os><family>mac</family><arch>aarch64</arch></os>
+            </activation>
+            <properties>
+                <ffmpeg.classifier>macosx-arm64</ffmpeg.classifier>
+            </properties>
+        </profile>
+    </profiles>
+</project>

@@ -1,0 +1,26 @@
+HOScrcpy-Sun
+============
+
+This project is a derivative work of HOScrcpy:
+
+    HOScrcpy — HarmonyOS remote device tool
+    https://gitcode.com/OpenHarmonyToolkitsPlaza/HOScrcpy
+    License: MIT
+
+Original HOScrcpy source code and documentation:
+    Copyright (c) the HOScrcpy authors — MIT License
+
+Modifications and additions in this repository:
+    Copyright (c) 2026 Mangoman2008 — MIT License
+
+The MIT license text is provided in the LICENSE file and applies to both the
+original work and the modifications. The original copyright notice and this
+permission notice are retained as required by the MIT License.
+
+Third-party components referenced or depended on by this project (JavaCPP /
+FFmpeg, FlatLaf, Jackson, Apache Commons Lang, OpenHarmony command-line-tools)
+remain under their respective licenses and copyrights.
+
+The closed-source hosScrcpy SDK jar, hdc binaries and device-side components
+are NOT included in this repository; their copyrights belong to their
+respective owners.

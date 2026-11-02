@@ -1,0 +1,68 @@
+target/
+out/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### IntelliJ IDEA ###
+.idea/*
+.idea/modules.xml
+.idea/jarRepositories.xml
+.idea/compiler.xml
+.idea/libraries/
+*.iws
+*.iml
+*.ipr
+
+### Eclipse ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/
+
+### Mac OS ###
+.DS_Store
+
+### ignore hosscrcpy-1.0.4-beta.jar ###
+hosscrcpy-1.0.4-beta.jar
+
+### HOScrcpy runtime / downloaded SDK ###
+temp/
+# 个人签名材料（含设备 UDID/SN、私钥）：不入公开仓库
+sign/
+
+# 签名材料：私钥和证书绝不入库
+sign/*.p12
+sign/*.jks
+sign/*.p7b
+sign/*.cer
+sign/poc_ext_signed.so
+*.p7b
+*.p12
+*.csr
+
+
+### 本仓库：不提交第三方二进制与运行时产物
+src/main/resources/libs/*.jar
+hdc.exe
+libusb_shared.dll
+logs/
+sun-data/
+*.log
+*.lck
